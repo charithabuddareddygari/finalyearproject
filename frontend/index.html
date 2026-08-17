@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Phishing Email Detector</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #eef4ff, #f8fafc);
+            margin: 0;
+            padding: 40px 20px;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: auto;
+            background: white;
+            padding: 35px;
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.10);
+        }
+
+        h1 {
+            text-align: center;
+            color: #172554;
+            margin-bottom: 10px;
+            font-size: 36px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 17px;
+            margin-bottom: 25px;
+        }
+
+        .input-label {
+            display: block;
+            font-weight: bold;
+            margin-top: 18px;
+            margin-bottom: 7px;
+            color: #334155;
+        }
+
+        .sender-input,
+        .subject-input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .sender-input:focus,
+        .subject-input:focus,
+        textarea:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+        }
+
+        textarea {
+            width: 100%;
+            height: 260px;
+            padding: 18px;
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            font-size: 15px;
+            resize: vertical;
+            outline: none;
+            font-family: Arial, sans-serif;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 25px;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            background: #2563eb;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        #result {
+            margin-top: 25px;
+            padding: 25px;
+            border-radius: 14px;
+            display: none;
+        }
+
+        .phishing {
+            background: #fff1f2;
+            border: 2px solid #ef4444;
+        }
+
+        .safe {
+            background: #f0fdf4;
+            border: 2px solid #22c55e;
+        }
+
+        .error {
+            background: #fff7ed;
+            border: 2px solid #f97316;
+            color: #9a3412;
+        }
+
+        .result-title {
+            margin-top: 0;
+            font-size: 26px;
+        }
+
+        .risk-score {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .probability-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .probability {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            text-align: center;
+        }
+
+        .probability-number {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 5px;
+        }
+
+        .reason {
+            background: white;
+            padding: 12px 15px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .details {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 18px;
+            color: #2563eb;
+        }
+
+        .info {
+            margin-top: 25px;
+            padding: 15px;
+            background: #eff6ff;
+            border-radius: 10px;
+            color: #1e40af;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .url-item {
+            word-break: break-all;
+            margin: 8px 0;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 20px 10px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .probability-box {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>🛡️ AI Phishing Email Detector</h1>
+
+    <p class="subtitle">
+        Analyze an email using machine learning and identify potential phishing threats.
+    </p>
+
+    <!-- Sender -->
+    <label class="input-label">👤 Sender Email</label>
+
+    <input
+        type="email"
+        id="senderEmail"
+        class="sender-input"
+        placeholder="Example: support@paypa1-security.com"
+    >
+
+    <!-- Subject -->
+    <label class="input-label">📧 Email Subject</label>
+
+    <input
+        type="text"
+        id="subject"
+        class="subject-input"
+        placeholder="Example: URGENT: Your account will be suspended"
+    >
+
+    <!-- Email Body -->
+    <label class="input-label">📝 Email Content</label>
+
+    <textarea
+        id="emailText"
+        placeholder="Paste the email content here...
+
+Example:
+
+We detected unusual activity on your account.
+
+Your account will be permanently suspended within 24 hours.
+
+Click here:
+http://paypa1-security.com/verify-account
+
+Please enter your username, password and card details."
+    ></textarea>
+
+    <button id="analyzeButton" onclick="analyzeEmail()">
+        🔍 Analyze Email
+    </button>
+
+    <div id="result"></div>
+
+    <div class="info">
+        🔒 Your email is analyzed by the local AI model running on your computer.
+    </div>
+
+</div>
+
+
+<script>
+
+async function analyzeEmail() {
+
+    const sender =
+        document.getElementById("senderEmail").value.trim();
+
+    const subject =
+        document.getElementById("subject").value.trim();
+
+    const email =
+        document.getElementById("emailText").value.trim();
+
+    const resultBox =
+        document.getElementById("result");
+
+    const analyzeButton =
+        document.getElementById("analyzeButton");
+
+
+    // Check email content
+    if (!email) {
+
+        alert("Please paste an email first.");
+
+        return;
+    }
+
+
+    // Show loading
+    resultBox.style.display = "block";
+
+    resultBox.className = "";
+
+    resultBox.innerHTML = `
+        <div class="loading">
+            ⏳ Analyzing email with AI...
+            <br><br>
+            Please wait.
+        </div>
+    `;
+
+
+    analyzeButton.disabled = true;
+
+    analyzeButton.innerText = "⏳ Analyzing...";
+
+
+    try {
+
+        // Send data to Flask backend
+        const response = await fetch(
+            "http://127.0.0.1:5000/analyze",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    email: email,
+
+                    sender: sender,
+
+                    subject: subject
+
+                })
+            }
+        );
+
+
+        const data = await response.json();
+
+
+        // Backend error
+        if (!response.ok || data.error) {
+
+            resultBox.className = "error";
+
+            resultBox.innerHTML = `
+                <h2>❌ Error</h2>
+
+                <p>
+                    ${data.error ||
+                    "Something went wrong while analyzing the email."}
+                </p>
+            `;
+
+            return;
+        }
+
+
+        // Probabilities
+        const phishingProbability =
+            Number(
+                data.phishing_probability || 0
+            ).toFixed(2);
+
+
+        const legitimateProbability =
+            Number(
+                data.legitimate_probability || 0
+            ).toFixed(2);
+
+
+        // ==========================================
+        // REASONS
+        // ==========================================
+
+        let reasonsHTML = "";
+
+
+        if (
+            data.reasons &&
+            data.reasons.length > 0
+        ) {
+
+            reasonsHTML = data.reasons
+                .map(reason => `
+                    <div class="reason">
+                        ⚠️ ${reason}
+                    </div>
+                `)
+                .join("");
+
+        } else {
+
+            reasonsHTML = `
+                <div class="reason">
+                    ✓ No obvious suspicious features detected.
+                </div>
+            `;
+        }
+
+
+        // ==========================================
+        // URLS
+        // ==========================================
+
+        let urlsHTML = "";
+
+
+        if (
+            data.urls &&
+            data.urls.length > 0
+        ) {
+
+            urlsHTML = data.urls
+                .map(url => `
+                    <div class="url-item">
+                        🔗 ${url}
+                    </div>
+                `)
+                .join("");
+
+        } else {
+
+            urlsHTML = `
+                <div class="reason">
+                    ✓ No URLs detected.
+                </div>
+            `;
+        }
+
+
+        // ==========================================
+        // PHISHING
+        // ==========================================
+
+        if (data.prediction === 1) {
+
+            resultBox.className = "phishing";
+
+
+            resultBox.innerHTML = `
+
+                <h2 class="result-title">
+                    🚨 PHISHING EMAIL DETECTED
+                </h2>
+
+
+                <div class="risk-score">
+                    ${phishingProbability}% RISK
+                </div>
+
+
+                <div class="probability-box">
+
+                    <div class="probability">
+
+                        🎣 Phishing Probability
+
+                        <div class="probability-number">
+                            ${phishingProbability}%
+                        </div>
+
+                    </div>
+
+
+                    <div class="probability">
+
+                        ✅ Legitimate Probability
+
+                        <div class="probability-number">
+                            ${legitimateProbability}%
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <h3>📋 Email Details</h3>
+
+
+                <div class="details">
+
+                    <strong>👤 Sender:</strong>
+
+                    <br>
+
+                    ${sender || "Not provided"}
+
+                </div>
+
+
+                <div class="details">
+
+                    <strong>📧 Subject:</strong>
+
+                    <br>
+
+                    ${subject || "Not provided"}
+
+                </div>
+
+
+                <h3>
+                    🔍 Why is this email suspicious?
+                </h3>
+
+
+                ${reasonsHTML}
+
+
+                <h3>
+                    🔗 URLs Found
+                </h3>
+
+
+                ${urlsHTML}
+
+            `;
+        }
+
+
+        // ==========================================
+        // LEGITIMATE
+        // ==========================================
+
+        else {
+
+            resultBox.className = "safe";
+
+
+            resultBox.innerHTML = `
+
+                <h2 class="result-title">
+                    ✅ EMAIL APPEARS LEGITIMATE
+                </h2>
+
+
+                <div class="risk-score">
+                    ${phishingProbability}% RISK
+                </div>
+
+
+                <div class="probability-box">
+
+                    <div class="probability">
+
+                        🎣 Phishing Probability
+
+                        <div class="probability-number">
+                            ${phishingProbability}%
+                        </div>
+
+                    </div>
+
+
+                    <div class="probability">
+
+                        ✅ Legitimate Probability
+
+                        <div class="probability-number">
+                            ${legitimateProbability}%
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <h3>📋 Email Details</h3>
+
+
+                <div class="details">
+
+                    <strong>👤 Sender:</strong>
+
+                    <br>
+
+                    ${sender || "Not provided"}
+
+                </div>
+
+
+                <div class="details">
+
+                    <strong>📧 Subject:</strong>
+
+                    <br>
+
+                    ${subject || "Not provided"}
+
+                </div>
+
+
+                <h3>
+                    🔍 Analysis
+                </h3>
+
+
+                ${reasonsHTML}
+
+
+                <h3>
+                    🔗 URLs Found
+                </h3>
+
+
+                ${urlsHTML}
+
+            `;
+        }
+
+    }
+
+
+    catch (error) {
+
+        console.error(error);
+
+
+        resultBox.style.display = "block";
+
+        resultBox.className = "error";
+
+
+        resultBox.innerHTML = `
+
+            <h2>
+                ❌ Could Not Connect to Backend
+            </h2>
+
+            <p>
+                The website could not connect to the Flask AI server.
+            </p>
+
+            <p>
+                Make sure the Flask server is running.
+            </p>
+
+            <strong>
+                python backend/app.py
+            </strong>
+
+            <p>
+                Backend:
+            </p>
+
+            <strong>
+                http://127.0.0.1:5000
+            </strong>
+
+        `;
+
+    }
+
+
+    finally {
+
+        analyzeButton.disabled = false;
+
+        analyzeButton.innerText =
+            "🔍 Analyze Email";
+
+    }
+
+}
+
+</script>
+
+</body>
+</html>
