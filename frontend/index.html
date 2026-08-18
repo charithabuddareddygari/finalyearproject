@@ -4,275 +4,819 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>AI Phishing Email Detector</title>
+    <title>PhishGuard AI | Phishing Email Detector</title>
 
     <style>
+
         * {
             box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #eef4ff, #f8fafc);
-            margin: 0;
-            padding: 40px 20px;
-            color: #1f2937;
+            font-family: Inter, Arial, sans-serif;
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 10% 10%, rgba(37, 99, 235, 0.18), transparent 30%),
+                radial-gradient(circle at 90% 90%, rgba(124, 58, 237, 0.18), transparent 30%),
+                #070b16;
+            color: #e5e7eb;
+            padding: 30px 20px;
         }
 
-        .container {
-            max-width: 950px;
+        /* ================================
+           MAIN APP
+        ================================= */
+
+        .app {
+            max-width: 1150px;
             margin: auto;
-            background: white;
-            padding: 35px;
+        }
+
+        /* ================================
+           HEADER
+        ================================= */
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 18px 22px;
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(148, 163, 184, 0.15);
             border-radius: 18px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.10);
+            backdrop-filter: blur(15px);
         }
 
-        h1 {
-            text-align: center;
-            color: #172554;
-            margin-bottom: 10px;
-            font-size: 36px;
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
         }
 
-        .subtitle {
-            text-align: center;
-            color: #64748b;
-            font-size: 17px;
-            margin-bottom: 25px;
+        .logo {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            font-size: 25px;
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
         }
 
-        .input-label {
+        .brand h1 {
+            font-size: 21px;
+            color: #ffffff;
+        }
+
+        .brand span {
             display: block;
-            font-weight: bold;
-            margin-top: 18px;
-            margin-bottom: 7px;
-            color: #334155;
+            margin-top: 3px;
+            font-size: 12px;
+            color: #94a3b8;
         }
 
-        .sender-input,
-        .subject-input {
-            width: 100%;
-            padding: 16px;
-            border: 2px solid #cbd5e1;
-            border-radius: 12px;
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 13px;
+            border-radius: 30px;
+            background: rgba(34, 197, 94, 0.10);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+            color: #86efac;
+            font-size: 13px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 10px #22c55e;
+        }
+
+        /* ================================
+           HERO
+        ================================= */
+
+        .hero {
+            text-align: center;
+            margin: 35px 0;
+        }
+
+        .hero h2 {
+            font-size: clamp(32px, 5vw, 52px);
+            line-height: 1.1;
+            color: white;
+            margin-bottom: 14px;
+        }
+
+        .hero h2 span {
+            background: linear-gradient(90deg, #60a5fa, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            max-width: 650px;
+            margin: auto;
+            color: #94a3b8;
+            line-height: 1.7;
             font-size: 15px;
+        }
+
+        /* ================================
+           MAIN GRID
+        ================================= */
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 0.75fr;
+            gap: 22px;
+            align-items: start;
+        }
+
+        .card {
+            background: rgba(15, 23, 42, 0.82);
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 22px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .card-subtitle {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 4px;
+        }
+
+        .ai-badge {
+            padding: 7px 11px;
+            border-radius: 8px;
+            background: rgba(124, 58, 237, 0.12);
+            border: 1px solid rgba(124, 58, 237, 0.25);
+            color: #c4b5fd;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* ================================
+           FORM
+        ================================= */
+
+        .field {
+            margin-bottom: 18px;
+        }
+
+        .field label {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .field input,
+        .field textarea {
+            width: 100%;
+            border: 1px solid #334155;
+            background: rgba(2, 6, 23, 0.7);
+            color: #e5e7eb;
+            border-radius: 12px;
+            padding: 14px;
             outline: none;
+            font-size: 14px;
+            transition: 0.25s;
         }
 
-        .sender-input:focus,
-        .subject-input:focus,
-        textarea:focus {
-            border-color: #2563eb;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+        .field input {
+            height: 48px;
         }
 
-        textarea {
-            width: 100%;
-            height: 260px;
-            padding: 18px;
-            border: 2px solid #cbd5e1;
-            border-radius: 12px;
-            font-size: 15px;
+        .field textarea {
+            min-height: 220px;
             resize: vertical;
-            outline: none;
+            line-height: 1.6;
             font-family: Arial, sans-serif;
         }
 
-        button {
-            width: 100%;
-            margin-top: 25px;
-            padding: 16px;
+        .field input::placeholder,
+        .field textarea::placeholder {
+            color: #475569;
+        }
+
+        .field input:focus,
+        .field textarea:focus {
+            border-color: #6366f1;
+            box-shadow:
+                0 0 0 3px rgba(99, 102, 241, 0.12),
+                0 0 25px rgba(99, 102, 241, 0.08);
+        }
+
+        /* ================================
+           BUTTONS
+        ================================= */
+
+        .button-row {
+            display: grid;
+            grid-template-columns: 1fr 120px;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .analyze-btn {
+            height: 52px;
             border: none;
             border-radius: 12px;
-            background: #2563eb;
             color: white;
-            font-size: 18px;
-            font-weight: bold;
+            font-size: 15px;
+            font-weight: 700;
             cursor: pointer;
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
+            transition: 0.25s;
         }
 
-        button:hover {
-            background: #1d4ed8;
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px rgba(37, 99, 235, 0.35);
         }
 
-        button:disabled {
-            background: #94a3b8;
+        .analyze-btn:disabled {
+            opacity: 0.6;
             cursor: not-allowed;
+            transform: none;
         }
+
+        .clear-btn {
+            height: 52px;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            color: #cbd5e1;
+            background: rgba(15, 23, 42, 0.8);
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .clear-btn:hover {
+            background: #1e293b;
+        }
+
+        /* ================================
+           QUICK TEST
+        ================================= */
+
+        .quick-test {
+            margin-top: 18px;
+            padding: 13px;
+            border-radius: 11px;
+            background: rgba(30, 41, 59, 0.45);
+            border: 1px solid rgba(148, 163, 184, 0.10);
+            color: #94a3b8;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        /* ================================
+           RESULT
+        ================================= */
 
         #result {
-            margin-top: 25px;
-            padding: 25px;
-            border-radius: 14px;
             display: none;
         }
 
-        .phishing {
-            background: #fff1f2;
-            border: 2px solid #ef4444;
+        .result-card {
+            animation: slideUp 0.4s ease;
         }
 
-        .safe {
-            background: #f0fdf4;
-            border: 2px solid #22c55e;
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .error {
-            background: #fff7ed;
-            border: 2px solid #f97316;
-            color: #9a3412;
+        .result-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
         }
 
-        .result-title {
-            margin-top: 0;
-            font-size: 26px;
+        .result-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .risk-score {
-            font-size: 32px;
-            font-weight: bold;
-            margin: 15px 0;
+        .result-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 23px;
         }
 
-        .probability-box {
+        .result-heading {
+            font-size: 18px;
+            font-weight: 800;
+            color: white;
+        }
+
+        .result-small {
+            font-size: 11px;
+            color: #64748b;
+            margin-top: 3px;
+        }
+
+        .risk-badge {
+            padding: 8px 13px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        /* ================================
+           RISK SCORE
+        ================================= */
+
+        .score-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0 28px;
+        }
+
+        .score-circle {
+            width: 175px;
+            height: 175px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            background:
+                radial-gradient(circle, #0f172a 62%, transparent 63%),
+                conic-gradient(#6366f1 0deg, #6366f1 0deg, #1e293b 0deg);
+        }
+
+        .score-number {
+            font-size: 37px;
+            font-weight: 800;
+            color: white;
+        }
+
+        .score-label {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
+
+        /* ================================
+           STATS
+        ================================= */
+
+        .stats {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin: 20px 0;
+            gap: 10px;
+            margin-bottom: 25px;
         }
 
-        .probability {
-            background: white;
+        .stat {
             padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #e2e8f0;
-            text-align: center;
+            border-radius: 12px;
+            background: rgba(2, 6, 23, 0.5);
+            border: 1px solid #1e293b;
         }
 
-        .probability-number {
-            font-size: 24px;
-            font-weight: bold;
-            margin-top: 5px;
+        .stat-label {
+            font-size: 11px;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 800;
+            color: white;
+        }
+
+        /* ================================
+           RESULT SECTIONS
+        ================================= */
+
+        .section {
+            margin-top: 20px;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #cbd5e1;
+            margin-bottom: 10px;
+        }
+
+        .detail-box {
+            padding: 12px 14px;
+            border-radius: 10px;
+            background: rgba(2, 6, 23, 0.55);
+            border: 1px solid #1e293b;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #94a3b8;
+            word-break: break-word;
+        }
+
+        .detail-box strong {
+            color: #e2e8f0;
         }
 
         .reason {
-            background: white;
-            padding: 12px 15px;
-            margin: 8px 0;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
+            display: flex;
+            gap: 10px;
+            padding: 11px 12px;
+            margin-bottom: 7px;
+            border-radius: 10px;
+            background: rgba(127, 29, 29, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.12);
+            color: #cbd5e1;
+            font-size: 12px;
+            line-height: 1.5;
         }
 
-        .details {
-            background: white;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 10px;
-            border: 1px solid #e2e8f0;
+        .url {
+            padding: 11px 12px;
+            margin-bottom: 7px;
+            border-radius: 9px;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid #1e293b;
+            color: #60a5fa;
+            font-size: 11px;
+            word-break: break-all;
         }
+
+        /* ================================
+           LOADING
+        ================================= */
 
         .loading {
             text-align: center;
-            font-size: 18px;
-            color: #2563eb;
+            padding: 50px 20px;
         }
 
-        .info {
-            margin-top: 25px;
-            padding: 15px;
-            background: #eff6ff;
-            border-radius: 10px;
-            color: #1e40af;
+        .spinner {
+            width: 42px;
+            height: 42px;
+            border: 3px solid #1e293b;
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            margin: auto;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            margin-top: 15px;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        /* ================================
+           ERROR
+        ================================= */
+
+        .error-box {
+            padding: 18px;
+            border-radius: 12px;
+            background: rgba(127, 29, 29, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+            color: #fca5a5;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        /* ================================
+           FOOTER
+        ================================= */
+
+        .footer {
             text-align: center;
-            font-size: 14px;
+            margin-top: 30px;
+            color: #475569;
+            font-size: 11px;
         }
 
-        .url-item {
-            word-break: break-all;
-            margin: 8px 0;
-            padding: 10px;
-            background: #f8fafc;
-            border-radius: 8px;
+        /* ================================
+           MOBILE
+        ================================= */
+
+        @media (max-width: 850px) {
+
+            .workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .result-panel {
+                min-height: auto;
+            }
         }
 
         @media (max-width: 600px) {
+
             body {
-                padding: 20px 10px;
+                padding: 15px;
             }
 
-            .container {
-                padding: 20px;
+            .header {
+                padding: 14px;
             }
 
-            h1 {
-                font-size: 28px;
+            .brand h1 {
+                font-size: 17px;
             }
 
-            .probability-box {
+            .status {
+                display: none;
+            }
+
+            .card {
+                padding: 18px;
+            }
+
+            .hero h2 {
+                font-size: 34px;
+            }
+
+            .button-row {
+                grid-template-columns: 1fr;
+            }
+
+            .score-circle {
+                width: 150px;
+                height: 150px;
+            }
+
+            .stats {
                 grid-template-columns: 1fr;
             }
         }
+
     </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="app">
 
-    <h1>🛡️ AI Phishing Email Detector</h1>
+    <!-- HEADER -->
 
-    <p class="subtitle">
-        Analyze an email using machine learning and identify potential phishing threats.
-    </p>
+    <header class="header">
 
-    <!-- Sender -->
-    <label class="input-label">👤 Sender Email</label>
+        <div class="brand">
 
-    <input
-        type="email"
-        id="senderEmail"
-        class="sender-input"
-        placeholder="Example: support@paypa1-security.com"
-    >
+            <div class="logo">
+                🛡️
+            </div>
 
-    <!-- Subject -->
-    <label class="input-label">📧 Email Subject</label>
+            <div>
+                <h1>PhishGuard AI</h1>
+                <span>Intelligent Email Threat Detection</span>
+            </div>
 
-    <input
-        type="text"
-        id="subject"
-        class="subject-input"
-        placeholder="Example: URGENT: Your account will be suspended"
-    >
+        </div>
 
-    <!-- Email Body -->
-    <label class="input-label">📝 Email Content</label>
+        <div class="status">
+            <div class="status-dot"></div>
+            AI Engine Ready
+        </div>
 
-    <textarea
-        id="emailText"
-        placeholder="Paste the email content here...
+    </header>
+
+
+    <!-- HERO -->
+
+    <section class="hero">
+
+        <h2>
+            Detect <span>Phishing Threats</span><br>
+            Before They Reach You
+        </h2>
+
+        <p>
+            Analyze suspicious emails using machine learning,
+            sender intelligence, subject analysis and URL security checks.
+        </p>
+
+    </section>
+
+
+    <!-- WORKSPACE -->
+
+    <div class="workspace">
+
+
+        <!-- =========================
+             INPUT PANEL
+        ========================== -->
+
+        <div class="card">
+
+            <div class="card-header">
+
+                <div>
+                    <div class="card-title">
+                        📩 Email Analysis
+                    </div>
+
+                    <div class="card-subtitle">
+                        Enter the email details below
+                    </div>
+                </div>
+
+                <div class="ai-badge">
+                    AI POWERED
+                </div>
+
+            </div>
+
+
+            <!-- SENDER -->
+
+            <div class="field">
+
+                <label>
+                    👤 Sender Email
+                </label>
+
+                <input
+                    type="email"
+                    id="senderEmail"
+                    placeholder="support@example.com"
+                >
+
+            </div>
+
+
+            <!-- SUBJECT -->
+
+            <div class="field">
+
+                <label>
+                    📧 Email Subject
+                </label>
+
+                <input
+                    type="text"
+                    id="subject"
+                    placeholder="Example: Urgent account verification required"
+                >
+
+            </div>
+
+
+            <!-- EMAIL -->
+
+            <div class="field">
+
+                <label>
+                    📝 Email Content
+                </label>
+
+                <textarea
+                    id="emailText"
+                    placeholder="Paste the complete email content here...
 
 Example:
 
-We detected unusual activity on your account.
+URGENT: Your account has been flagged.
 
-Your account will be permanently suspended within 24 hours.
+Your account will be suspended within 24 hours.
 
-Click here:
-http://paypa1-security.com/verify-account
+Please verify your account immediately:
 
-Please enter your username, password and card details."
-    ></textarea>
+http://example-security-login.com/verify
 
-    <button id="analyzeButton" onclick="analyzeEmail()">
-        🔍 Analyze Email
-    </button>
+Enter your username and password to continue."
+                ></textarea>
 
-    <div id="result"></div>
+            </div>
 
-    <div class="info">
-        🔒 Your email is analyzed by the local AI model running on your computer.
+
+            <!-- BUTTONS -->
+
+            <div class="button-row">
+
+                <button
+                    class="analyze-btn"
+                    id="analyzeButton"
+                    onclick="analyzeEmail()"
+                >
+                    🔍 Analyze Email
+                </button>
+
+                <button
+                    class="clear-btn"
+                    onclick="clearForm()"
+                >
+                    Clear
+                </button>
+
+            </div>
+
+
+            <div class="quick-test">
+
+                💡 <strong>Tip:</strong>
+                Include the sender, subject, complete email content
+                and any links for a more detailed analysis.
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             RESULT PANEL
+        ========================== -->
+
+        <div class="card result-panel">
+
+            <div id="emptyState">
+
+                <div style="text-align:center; padding:55px 15px;">
+
+                    <div style="font-size:55px; margin-bottom:18px;">
+                        🔐
+                    </div>
+
+                    <h3 style="color:white; margin-bottom:10px;">
+                        Ready to Analyze
+                    </h3>
+
+                    <p style="color:#64748b; font-size:13px; line-height:1.7;">
+                        Enter an email on the left and click
+                        <strong style="color:#94a3b8;">
+                            Analyze Email
+                        </strong>
+                        to see the AI security assessment.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div id="result"></div>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer">
+
+        🛡️ PhishGuard AI &nbsp;•&nbsp;
+        Machine Learning Email Security
+        &nbsp;•&nbsp;
+        Local Analysis
+
     </div>
 
 </div>
@@ -294,44 +838,52 @@ async function analyzeEmail() {
     const resultBox =
         document.getElementById("result");
 
-    const analyzeButton =
+    const emptyState =
+        document.getElementById("emptyState");
+
+    const button =
         document.getElementById("analyzeButton");
 
 
-    // Check email content
     if (!email) {
 
-        alert("Please paste an email first.");
+        alert("Please paste the email content first.");
 
         return;
     }
 
 
-    // Show loading
+    emptyState.style.display = "none";
+
     resultBox.style.display = "block";
 
-    resultBox.className = "";
 
     resultBox.innerHTML = `
+
         <div class="loading">
-            ⏳ Analyzing email with AI...
-            <br><br>
-            Please wait.
+
+            <div class="spinner"></div>
+
+            <div class="loading-text">
+                AI is analyzing the email...
+            </div>
+
         </div>
+
     `;
 
 
-    analyzeButton.disabled = true;
+    button.disabled = true;
 
-    analyzeButton.innerText = "⏳ Analyzing...";
+    button.innerText = "⏳ Analyzing...";
 
 
     try {
 
-        // Send data to Flask backend
         const response = await fetch(
             "http://127.0.0.1:5000/analyze",
             {
+
                 method: "POST",
 
                 headers: {
@@ -340,54 +892,120 @@ async function analyzeEmail() {
 
                 body: JSON.stringify({
 
-                    email: email,
-
                     sender: sender,
 
-                    subject: subject
+                    subject: subject,
+
+                    email: email
 
                 })
+
             }
         );
 
 
-        const data = await response.json();
+        const data =
+            await response.json();
 
 
-        // Backend error
         if (!response.ok || data.error) {
 
-            resultBox.className = "error";
-
             resultBox.innerHTML = `
-                <h2>❌ Error</h2>
 
-                <p>
+                <div class="error-box">
+
+                    <strong>❌ Analysis Error</strong>
+
+                    <br><br>
+
                     ${data.error ||
-                    "Something went wrong while analyzing the email."}
-                </p>
+                    "Something went wrong."}
+
+                </div>
+
             `;
 
             return;
         }
 
 
-        // Probabilities
+        /* =========================
+           VALUES
+        ========================== */
+
+        const riskScore =
+            Number(
+                data.risk_score ??
+                data.phishing_probability ??
+                0
+            );
+
+
         const phishingProbability =
             Number(
-                data.phishing_probability || 0
-            ).toFixed(2);
+                data.phishing_probability ?? 0
+            );
 
 
         const legitimateProbability =
             Number(
-                data.legitimate_probability || 0
-            ).toFixed(2);
+                data.legitimate_probability ??
+                (100 - riskScore)
+            );
 
 
-        // ==========================================
-        // REASONS
-        // ==========================================
+        const riskLevel =
+            data.risk_level ||
+            (
+                riskScore >= 80
+                    ? "CRITICAL"
+                    : riskScore >= 60
+                    ? "HIGH"
+                    : riskScore >= 40
+                    ? "MEDIUM"
+                    : "LOW"
+            );
+
+
+        /* =========================
+           RISK COLORS
+        ========================== */
+
+        let riskColor = "#22c55e";
+        let riskBackground =
+            "rgba(34,197,94,0.12)";
+
+        let riskIcon = "✅";
+
+        if (riskLevel === "CRITICAL") {
+
+            riskColor = "#ef4444";
+            riskBackground =
+                "rgba(239,68,68,0.12)";
+
+            riskIcon = "🚨";
+
+        } else if (riskLevel === "HIGH") {
+
+            riskColor = "#f97316";
+            riskBackground =
+                "rgba(249,115,22,0.12)";
+
+            riskIcon = "⚠️";
+
+        } else if (riskLevel === "MEDIUM") {
+
+            riskColor = "#eab308";
+            riskBackground =
+                "rgba(234,179,8,0.12)";
+
+            riskIcon = "⚠️";
+        }
+
+
+        /* =========================
+           REASONS
+        ========================== */
 
         let reasonsHTML = "";
 
@@ -397,27 +1015,40 @@ async function analyzeEmail() {
             data.reasons.length > 0
         ) {
 
-            reasonsHTML = data.reasons
-                .map(reason => `
-                    <div class="reason">
-                        ⚠️ ${reason}
-                    </div>
-                `)
-                .join("");
+            reasonsHTML =
+                data.reasons
+                    .map(reason => `
+
+                        <div class="reason">
+
+                            <span>⚠️</span>
+
+                            <span>
+                                ${escapeHTML(reason)}
+                            </span>
+
+                        </div>
+
+                    `)
+                    .join("");
 
         } else {
 
             reasonsHTML = `
-                <div class="reason">
-                    ✓ No obvious suspicious features detected.
+
+                <div class="detail-box">
+
+                    ✓ No obvious suspicious indicators detected.
+
                 </div>
+
             `;
         }
 
 
-        // ==========================================
-        // URLS
-        // ==========================================
+        /* =========================
+           URLS
+        ========================== */
 
         let urlsHTML = "";
 
@@ -427,243 +1058,312 @@ async function analyzeEmail() {
             data.urls.length > 0
         ) {
 
-            urlsHTML = data.urls
-                .map(url => `
-                    <div class="url-item">
-                        🔗 ${url}
-                    </div>
-                `)
-                .join("");
+            urlsHTML =
+                data.urls
+                    .map(url => `
+
+                        <div class="url">
+
+                            🔗 ${escapeHTML(url)}
+
+                        </div>
+
+                    `)
+                    .join("");
 
         } else {
 
             urlsHTML = `
-                <div class="reason">
+
+                <div class="detail-box">
+
                     ✓ No URLs detected.
-                </div>
-            `;
-        }
-
-
-        // ==========================================
-        // PHISHING
-        // ==========================================
-
-        if (data.prediction === 1) {
-
-            resultBox.className = "phishing";
-
-
-            resultBox.innerHTML = `
-
-                <h2 class="result-title">
-                    🚨 PHISHING EMAIL DETECTED
-                </h2>
-
-
-                <div class="risk-score">
-                    ${phishingProbability}% RISK
-                </div>
-
-
-                <div class="probability-box">
-
-                    <div class="probability">
-
-                        🎣 Phishing Probability
-
-                        <div class="probability-number">
-                            ${phishingProbability}%
-                        </div>
-
-                    </div>
-
-
-                    <div class="probability">
-
-                        ✅ Legitimate Probability
-
-                        <div class="probability-number">
-                            ${legitimateProbability}%
-                        </div>
-
-                    </div>
 
                 </div>
-
-
-                <h3>📋 Email Details</h3>
-
-
-                <div class="details">
-
-                    <strong>👤 Sender:</strong>
-
-                    <br>
-
-                    ${sender || "Not provided"}
-
-                </div>
-
-
-                <div class="details">
-
-                    <strong>📧 Subject:</strong>
-
-                    <br>
-
-                    ${subject || "Not provided"}
-
-                </div>
-
-
-                <h3>
-                    🔍 Why is this email suspicious?
-                </h3>
-
-
-                ${reasonsHTML}
-
-
-                <h3>
-                    🔗 URLs Found
-                </h3>
-
-
-                ${urlsHTML}
 
             `;
         }
 
 
-        // ==========================================
-        // LEGITIMATE
-        // ==========================================
+        /* =========================
+           RESULT
+        ========================== */
 
-        else {
-
-            resultBox.className = "safe";
-
-
-            resultBox.innerHTML = `
-
-                <h2 class="result-title">
-                    ✅ EMAIL APPEARS LEGITIMATE
-                </h2>
+        const isPhishing =
+            data.prediction === 1;
 
 
-                <div class="risk-score">
-                    ${phishingProbability}% RISK
-                </div>
+        const heading =
+            isPhishing
+                ? "Phishing Email Detected"
+                : "Email Appears Legitimate";
 
 
-                <div class="probability-box">
-
-                    <div class="probability">
-
-                        🎣 Phishing Probability
-
-                        <div class="probability-number">
-                            ${phishingProbability}%
-                        </div>
-
-                    </div>
+        const subheading =
+            isPhishing
+                ? "Potential security threat identified"
+                : "No major phishing indicators detected";
 
 
-                    <div class="probability">
-
-                        ✅ Legitimate Probability
-
-                        <div class="probability-number">
-                            ${legitimateProbability}%
-                        </div>
-
-                    </div>
-
-                </div>
-
-
-                <h3>📋 Email Details</h3>
-
-
-                <div class="details">
-
-                    <strong>👤 Sender:</strong>
-
-                    <br>
-
-                    ${sender || "Not provided"}
-
-                </div>
-
-
-                <div class="details">
-
-                    <strong>📧 Subject:</strong>
-
-                    <br>
-
-                    ${subject || "Not provided"}
-
-                </div>
-
-
-                <h3>
-                    🔍 Analysis
-                </h3>
-
-
-                ${reasonsHTML}
-
-
-                <h3>
-                    🔗 URLs Found
-                </h3>
-
-
-                ${urlsHTML}
-
-            `;
-        }
-
-    }
-
-
-    catch (error) {
-
-        console.error(error);
-
-
-        resultBox.style.display = "block";
-
-        resultBox.className = "error";
+        const icon =
+            isPhishing
+                ? "🚨"
+                : "✅";
 
 
         resultBox.innerHTML = `
 
-            <h2>
-                ❌ Could Not Connect to Backend
-            </h2>
+            <div class="result-card">
 
-            <p>
-                The website could not connect to the Flask AI server.
-            </p>
+                <!-- RESULT HEADER -->
 
-            <p>
-                Make sure the Flask server is running.
-            </p>
+                <div class="result-top">
 
-            <strong>
-                python backend/app.py
-            </strong>
+                    <div class="result-status">
 
-            <p>
+                        <div
+                            class="result-icon"
+                            style="
+                                background:${riskBackground};
+                                color:${riskColor};
+                            "
+                        >
+                            ${icon}
+                        </div>
+
+                        <div>
+
+                            <div class="result-heading">
+                                ${heading}
+                            </div>
+
+                            <div class="result-small">
+                                ${subheading}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="risk-badge"
+                        style="
+                            background:${riskBackground};
+                            color:${riskColor};
+                        "
+                    >
+                        ${riskLevel} RISK
+                    </div>
+
+                </div>
+
+
+                <!-- SCORE -->
+
+                <div class="score-container">
+
+                    <div
+                        class="score-circle"
+                        id="scoreCircle"
+                    >
+
+                        <div class="score-number">
+                            ${riskScore.toFixed(1)}%
+                        </div>
+
+                        <div class="score-label">
+                            RISK SCORE
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- STATS -->
+
+                <div class="stats">
+
+                    <div class="stat">
+
+                        <div class="stat-label">
+                            🎣 Phishing Probability
+                        </div>
+
+                        <div
+                            class="stat-value"
+                            style="color:#f87171;"
+                        >
+                            ${phishingProbability.toFixed(1)}%
+                        </div>
+
+                    </div>
+
+
+                    <div class="stat">
+
+                        <div class="stat-label">
+                            🛡️ Legitimate Probability
+                        </div>
+
+                        <div
+                            class="stat-value"
+                            style="color:#4ade80;"
+                        >
+                            ${legitimateProbability.toFixed(1)}%
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+                <!-- EMAIL DETAILS -->
+
+                <div class="section">
+
+                    <div class="section-title">
+                        📋 EMAIL DETAILS
+                    </div>
+
+
+                    <div class="detail-box">
+
+                        <strong>Sender:</strong>
+
+                        ${escapeHTML(
+                            sender ||
+                            data.sender ||
+                            "Not provided"
+                        )}
+
+                    </div>
+
+
+                    <div class="detail-box">
+
+                        <strong>Subject:</strong>
+
+                        ${escapeHTML(
+                            subject ||
+                            data.subject ||
+                            "Not provided"
+                        )}
+
+                    </div>
+
+                </div>
+
+
+                <!-- REASONS -->
+
+                <div class="section">
+
+                    <div class="section-title">
+                        🔎 DETECTION FINDINGS
+                    </div>
+
+                    ${reasonsHTML}
+
+                </div>
+
+
+                <!-- URLS -->
+
+                <div class="section">
+
+                    <div class="section-title">
+                        🔗 DETECTED URLS
+                    </div>
+
+                    ${urlsHTML}
+
+                </div>
+
+            </div>
+
+        `;
+
+
+        /* =========================
+           ANIMATE SCORE
+        ========================== */
+
+        setTimeout(() => {
+
+            const circle =
+                document.getElementById(
+                    "scoreCircle"
+                );
+
+            if (circle) {
+
+                const degrees =
+                    Math.min(
+                        riskScore,
+                        100
+                    ) * 3.6;
+
+
+                circle.style.background = `
+
+                    radial-gradient(
+                        circle,
+                        #0f172a 62%,
+                        transparent 63%
+                    ),
+
+                    conic-gradient(
+                        ${riskColor}
+                        0deg
+                        ${degrees}deg,
+
+                        #1e293b
+                        ${degrees}deg
+                    )
+
+                `;
+
+            }
+
+        }, 100);
+
+
+    } catch (error) {
+
+        console.error(error);
+
+
+        resultBox.innerHTML = `
+
+            <div class="error-box">
+
+                <strong>
+                    ❌ Could Not Connect to Backend
+                </strong>
+
+                <br><br>
+
+                Make sure Flask is running:
+
+                <br><br>
+
+                <strong>
+                    python backend/app.py
+                </strong>
+
+                <br><br>
+
                 Backend:
-            </p>
 
-            <strong>
-                http://127.0.0.1:5000
-            </strong>
+                <br>
+
+                <strong>
+                    http://127.0.0.1:5000
+                </strong>
+
+            </div>
 
         `;
 
@@ -672,12 +1372,64 @@ async function analyzeEmail() {
 
     finally {
 
-        analyzeButton.disabled = false;
+        button.disabled = false;
 
-        analyzeButton.innerText =
+        button.innerText =
             "🔍 Analyze Email";
 
     }
+
+}
+
+
+/* =========================
+   CLEAR FORM
+========================= */
+
+function clearForm() {
+
+    document.getElementById(
+        "senderEmail"
+    ).value = "";
+
+    document.getElementById(
+        "subject"
+    ).value = "";
+
+    document.getElementById(
+        "emailText"
+    ).value = "";
+
+
+    document.getElementById(
+        "result"
+    ).style.display = "none";
+
+
+    document.getElementById(
+        "emptyState"
+    ).style.display = "block";
+
+}
+
+
+/* =========================
+   BASIC HTML ESCAPE
+========================= */
+
+function escapeHTML(value) {
+
+    return String(value)
+
+        .replace(/&/g, "&amp;")
+
+        .replace(/</g, "&lt;")
+
+        .replace(/>/g, "&gt;")
+
+        .replace(/"/g, "&quot;")
+
+        .replace(/'/g, "&#039;");
 
 }
 
